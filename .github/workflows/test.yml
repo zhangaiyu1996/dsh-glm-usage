@@ -18,21 +18,15 @@ jobs:
         with:
           node-version: '24'
 
-      # React is installed into its OWN directory on purpose. Installing it in
-      # the plugin root would make npm resolve this package's peerDependencies
-      # too, and `@deepseek-ai/cordis` lives on the DSH install, not on the
-      # public registry — the install would hang or fail for a reason that has
-      # nothing to do with what this job tests.
-      - name: Install react for the render harness
-        run: |
-          mkdir -p "$RUNNER_TEMP/reactenv"
-          cd "$RUNNER_TEMP/reactenv"
-          npm init -y >/dev/null
-          npm install --no-audit --no-fund react@18 react-dom@18
+      # `--no-save` keeps this out of package.json: the runtime packages this
+      # package needs are peerDependencies supplied by the DSH install, and the
+      # job only needs the render harness's own deps.
+      - name: Install test dependencies
+        run: npm install --no-save --no-audit --no-fund react@18 react-dom@18
 
       - name: Render every registered component
         env:
-          GLM_PROFILE_NODE_MODULES: ${{ runner.temp }}/reactenv/node_modules/..
+          GLM_PROFILE_NODE_MODULES: ${{ github.workspace }}
         run: node test/client.test.mjs
 
   host:

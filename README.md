@@ -115,9 +115,17 @@ export GLM_PROFILE_NODE_MODULES="$HOME/.dsh/profiles/node_modules"
 npm test
 ```
 
-`test/host.test.mjs` 会用 `ZAI_API_KEY`（或 `GLM_TEST_KEY`）做真实上游读取；没有可用 Key 时，涉及真实读取的用例会失败 —— 这是有意的，因为「归一化结果对不对」只有对着真实响应才验证得了。设置 `GLM_TEST_DIR` 可把测试用的设置文件写到临时目录，避免污染真实 profile。
+`test/host.test.mjs` 会用 `ZAI_API_KEY`（或 `GLM_TEST_KEY`）做真实上游读取；没有可用 Key 时它会直接退出并说明原因（退出码 2），而不是假装通过 —— 「归一化结果对不对」只有对着真实响应才验证得了，用 fixture 替代只会得到一份会跟上游一起腐化的假保证。设置 `GLM_TEST_DIR` 可把测试用的设置文件写到临时目录，避免污染真实 profile。
+
+### CI
+
+`.github/workflows/test.yml` 两个 job：
+
+- **client**：在 runner 上装 react 后跑渲染测试，任何 fork 的 PR 都会跑。
+- **host**：需要仓库 secret `GLM_TEST_KEY`（一枚真实的 Coding Plan Key）。未配置时这一步**跳过**并给出警告，而不是失败 —— 这样 fork 的 PR 不会因为读不到 secret 而变红。想让 live 测试真正跑起来，去 `Settings → Secrets and variables → Actions` 加一个 `GLM_TEST_KEY`。
 
 `lib/quota.js` 是完全纯函数（归一化 + 抓取），可以单独引用来验证上游字段。
+
 
 ## 许可
 
