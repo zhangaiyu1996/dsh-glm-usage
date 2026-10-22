@@ -3,6 +3,20 @@
 restart.log
 restart-dsh.ps1
 INSTALL-STATUS.md
+MARKET-SUBMISSION.md
+submit-to-market.ps1
+
+# Market submission workspace
+.market/
+tools/inspect-incumbent.mjs
+tools/compare-incumbent-glm.mjs
+tools/incumbent-behaviour.mjs
+tools/show-generic-scan.mjs
+tools/show-scan-keys.mjs
+tools/run-incumbent-parser.mjs
+tools/scan-live-with-incumbent.mjs
+tools/pin-100.mjs
+tools/probe-fraction-branch.mjs
 
 # Dependencies
 node_modules/
@@ -16,3 +30,5 @@ desktop.ini
 
 # Logs
 *.log
+tools/explain-incumbent-scan.mjs
+tools/repro-percent-bug.mjs
