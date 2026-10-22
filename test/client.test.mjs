@@ -8,12 +8,33 @@
  * component to static markup to prove the components actually produce DOM.
  */
 import { createRequire } from "node:module";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const require = createRequire(join(process.env.GLM_PROFILE_NODE_MODULES ?? "", "noop.js"));
+
+/**
+ * Resolve where react lives.
+ *
+ * `GLM_PROFILE_NODE_MODULES` may name either a `node_modules` directory itself
+ * or the package root that contains one — both spellings are natural to write,
+ * and guessing wrong would surface as an unhelpful "cannot find react".
+ */
+function reactRoot() {
+  const configured = process.env.GLM_PROFILE_NODE_MODULES;
+  if (configured === undefined || configured.trim() === "") return undefined;
+  const candidate = resolve(configured);
+  // A `node_modules` path: anchor the require one level up, so the resolver
+  // looks inside it.
+  if (candidate.replace(/[\\/]+$/u, "").endsWith("node_modules")) return dirname(candidate);
+  // A package root: anchor there; node walks into its node_modules.
+  if (existsSync(join(candidate, "node_modules"))) return candidate;
+  return candidate;
+}
+
+const root = reactRoot();
+const require = createRequire(root === undefined ? join(here, "noop.js") : join(root, "noop.js"));
 const React = require("react");
 const jsxRuntime = require("react/jsx-runtime");
 const ReactDOMServer = require("react-dom/server");

@@ -18,14 +18,21 @@ jobs:
         with:
           node-version: '24'
 
-      # The client suite renders the real bundle, so it needs react and the
-      # server renderer; it does not need DSH itself.
-      - name: Install test dependencies
-        run: npm install --no-save react@18 react-dom@18
+      # React is installed into its OWN directory on purpose. Installing it in
+      # the plugin root would make npm resolve this package's peerDependencies
+      # too, and `@deepseek-ai/cordis` lives on the DSH install, not on the
+      # public registry — the install would hang or fail for a reason that has
+      # nothing to do with what this job tests.
+      - name: Install react for the render harness
+        run: |
+          mkdir -p "$RUNNER_TEMP/reactenv"
+          cd "$RUNNER_TEMP/reactenv"
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund react@18 react-dom@18
 
       - name: Render every registered component
         env:
-          GLM_PROFILE_NODE_MODULES: ${{ github.workspace }}
+          GLM_PROFILE_NODE_MODULES: ${{ runner.temp }}/reactenv/node_modules/..
         run: node test/client.test.mjs
 
   host:
@@ -48,7 +55,7 @@ jobs:
         run: |
           if [ -z "$GLM_TEST_KEY" ]; then
             echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::GLM_TEST_KEY is not set; skipping the live upstream suite."
+            echo "::warning::GLM_TEST_KEY is not set; skipping the live upstream suite. Add a Coding Plan key under Settings > Secrets to run it."
           else
             echo "present=true" >> "$GITHUB_OUTPUT"
           fi
