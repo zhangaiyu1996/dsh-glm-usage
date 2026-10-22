@@ -1,0 +1,61 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  client:
+    name: client bundle (render + slot wiring)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # The client suite renders the real bundle, so it needs react and the
+      # server renderer; it does not need DSH itself.
+      - name: Install test dependencies
+        run: npm install --no-save react@18 react-dom@18
+
+      - name: Render every registered component
+        env:
+          GLM_PROFILE_NODE_MODULES: ${{ github.workspace }}
+        run: node test/client.test.mjs
+
+  host:
+    name: host routes (live upstream)
+    runs-on: ubuntu-latest
+    # Needs a real Coding Plan key: the suite reads the live quota endpoint, so
+    # a fork's pull request (which cannot see secrets) skips rather than fails.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Check for a configured key
+        id: key
+        env:
+          GLM_TEST_KEY: ${{ secrets.GLM_TEST_KEY }}
+        run: |
+          if [ -z "$GLM_TEST_KEY" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GLM_TEST_KEY is not set; skipping the live upstream suite."
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Routes, auth, key resolution, error classification
+        if: steps.key.outputs.present == 'true'
+        env:
+          GLM_TEST_KEY: ${{ secrets.GLM_TEST_KEY }}
+          GLM_TEST_DIR: ${{ runner.temp }}/glm-usage-test
+        run: node test/host.test.mjs

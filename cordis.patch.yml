@@ -1,0 +1,6 @@
+# Register the GLM usage plugin. It contributes no model provider — it only
+# reads the Zhipu / Z.AI quota endpoint and renders it, so nothing about the
+# profile's model roster changes.
+- insert:
+    - id: glm-usage
+      name: dsh-glm-usage

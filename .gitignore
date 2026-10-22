@@ -1,0 +1,18 @@
+# Local scratch — never published
+.test-data/
+restart.log
+restart-dsh.ps1
+INSTALL-STATUS.md
+
+# Dependencies
+node_modules/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log

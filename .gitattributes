@@ -1,0 +1,16 @@
+# Normalize line endings on commit so a Windows checkout and a Linux CI run
+# produce identical bytes. `text=auto` lets git decide per file; the explicit
+# rules below pin the types where the difference actually matters.
+* text=auto eol=lf
+
+*.js text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.svg text eol=lf
+
+# Binary fixtures, should any be added later.
+*.png binary
+*.jpg binary
+*.woff2 binary
