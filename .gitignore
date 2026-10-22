@@ -8,6 +8,9 @@ submit-to-market.ps1
 
 # Market submission workspace
 .market/
+
+# One-off analysis of another plugin's parser, written to file a bug report.
+# Kept out of the repo: it reads third-party code, not this plugin's.
 tools/inspect-incumbent.mjs
 tools/compare-incumbent-glm.mjs
 tools/incumbent-behaviour.mjs
@@ -17,6 +20,8 @@ tools/run-incumbent-parser.mjs
 tools/scan-live-with-incumbent.mjs
 tools/pin-100.mjs
 tools/probe-fraction-branch.mjs
+tools/explain-incumbent-scan.mjs
+tools/repro-percent-bug.mjs
 
 # Dependencies
 node_modules/
@@ -30,5 +35,3 @@ desktop.ini
 
 # Logs
 *.log
-tools/explain-incumbent-scan.mjs
-tools/repro-percent-bug.mjs
